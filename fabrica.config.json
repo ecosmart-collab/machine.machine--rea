@@ -1,5 +1,6 @@
 {
-  "repo": "./sandbox/app-exemplo",
+  "repo": "../acelera-portal",
+  "portal": { "url": "http://localhost:3360", "tokenEnv": "PORTAL_TOKEN" },
   "branchBase": "main",
   "comandoPreparo": "",
   "comandoTeste": "npm test",

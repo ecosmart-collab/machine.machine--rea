@@ -107,6 +107,7 @@ ler `status --json` e mostrar o andamento real para quem votou.
 |---|---|---|
 | 1 — MVP | Triagem → planejamento → devs paralelos em worktrees → revisão → QA → aprovação | ✅ |
 | 2 — Estrutura do quadro | Camadas, investigação, refinamento, risco, prioridade, ledger, retomada, timeout, conhecimento | ✅ |
-| 3 — Gatilhos reais | Webhook (n8n) do portal de ideias e do "Reportar bug" → `nova`; status de volta para o portal; alerta OpenTelemetry/Sentry → demanda `telemetria` | próximo |
+| 3a — Portal como fonte | Repositório `acelera-portal`: ideias com votos, bugs, esteira de status; a fábrica puxa a fila (`/api/fabrica/fila`) e devolve o status (`PATCH /api/fabrica/itens/:id`) | ✅ |
+| 3b — Telemetria | Alerta OpenTelemetry/Sentry → demanda `telemetria`; hospedar portal + fábrica numa VPS | próximo |
 | 4 — Escala | Cada esquadrão em container/VPS; harness Codex; preview por demanda para homologação e2e (Playwright) | — |
 | 5 — Autonomia total | `deployAutomaticoAteRisco: medio`; métricas (custo por demanda, % entregue sem humano, retrabalho); ou migrar a execução para o Gas Town e manter o acelera.360 como camada de triagem | — |

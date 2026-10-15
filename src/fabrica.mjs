@@ -14,6 +14,7 @@ import { triagem, investigacao, refinamento } from './camadas/2-triagem.mjs';
 import { planejar, orquestrar, abrirIntegracao, fecharIntegracao } from './camadas/3-engenharia.mjs';
 import { homologar } from './camadas/4-homologacao.mjs';
 import { podePublicarSozinho, publicar, devolverParaFila } from './camadas/5-entrega.mjs';
+import { puxarDoPortal, devolverStatusAoPortal, portalConfigurado } from './camadas/fontes-portal.mjs';
 
 const FINAIS = ['rejeitada', 'entregue', 'aguardando-aprovacao'];
 
@@ -98,10 +99,15 @@ function relatorio(ctx) {
 
 // Roda um ciclo: tria tudo que chegou e desenvolve a demanda mais prioritária.
 async function ciclo() {
+  // Uma falha de rede com o portal não pode parar a fábrica: registra e segue.
+  const portal = (fn) => fn().catch((e) => console.error(`⚠️  Portal: ${e.message}`));
+  await portal(puxarDoPortal);
   await coletarEntrada();
   for (const e of listar().filter((e) => e.status === 'recebida')) await processar(e.id, { soTriagem: true });
+  await portal(devolverStatusAoPortal);
   const proxima = ordenar(listar().filter((e) => e.status === 'aprovada-para-dev'))[0];
   if (proxima) await processar(proxima.id);
+  await portal(devolverStatusAoPortal);
   return Boolean(proxima);
 }
 
@@ -155,11 +161,22 @@ const comandos = {
     }
   },
 
+  // Só a ponte com o portal, sem rodar agentes: traz a fila e devolve os status.
+  async sincronizar() {
+    if (!portalConfigurado()) throw new Error(`Portal não configurado: defina "portal.url" na config e a variável ${CFG.portal?.tokenEnv ?? 'PORTAL_TOKEN'}.`);
+    const novos = await puxarDoPortal();
+    await devolverStatusAoPortal();
+    console.log(`🔄 Sincronizado: ${novos.length} demanda(s) nova(s) vinda(s) do portal.`);
+  },
+
   async aprovar([id]) {
     if (!id) throw new Error('Uso: aprovar <id>');
     const ctx = abrir(id);
     if (ctx.estado.status !== 'aguardando-aprovacao') throw new Error(`Demanda está "${ctx.estado.status}", não "aguardando-aprovacao".`);
-    if ((await publicar(ctx)).ok) return ctx.status('entregue', 'aprovado por humano');
+    if ((await publicar(ctx)).ok) {
+      ctx.status('entregue', 'aprovado por humano');
+      return devolverStatusAoPortal().catch((e) => console.error(`⚠️  Portal: ${e.message}`));
+    }
     await devolverParaFila(ctx);
     console.log('↩️  Conflito com a versão atual: a demanda voltou para a fila e será refeita no próximo "run".');
   },
@@ -235,7 +252,7 @@ Alerta de telemetria: pedidos com quantidade 0.5 e 1.7 chegaram ao checkout.
 adicionarItem() aceita quantidade não inteira.
 `);
     console.log('✅ 2 demandas de exemplo em demandas/entrada/ (uma da comunidade, um bug da telemetria)');
-    console.log('\nAgora rode:  node src/fabrica.mjs run');
+    console.log('\nPara usar o sandbox, ajuste "repo" em fabrica.config.json para "./sandbox/app-exemplo" e rode:  node src/fabrica.mjs run');
   },
 };
 
@@ -253,6 +270,7 @@ if (!comandos[cmd]) {
     retomar <id>    continua uma demanda de onde parou (reaproveita etapas concluídas)
     status [id] [--json]
     aprovar <id>    publica uma entrega que aguarda aprovação humana
+    sincronizar     só a ponte com o portal: traz a fila e devolve os status
 
   Conhecimento
     conhecer        gera conhecimento/projeto.md a partir do repositório alvo

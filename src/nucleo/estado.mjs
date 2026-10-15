@@ -22,7 +22,7 @@ function lerCabecalho(texto) {
   return { meta, corpo: texto.slice(m[0].length) };
 }
 
-export async function criar(texto, { nome, origem, votos } = {}) {
+export async function criar(texto, { nome, origem, votos, externo } = {}) {
   const { meta, corpo } = lerCabecalho(texto);
   const agora = new Date();
   const titulo = nome ?? corpo.match(/^#\s+(.+)/m)?.[1] ?? corpo.trim().split('\n')[0].slice(0, 60);
@@ -34,6 +34,7 @@ export async function criar(texto, { nome, origem, votos } = {}) {
     id, titulo,
     origem: origem ?? meta.origem ?? 'manual',
     votos: Number(votos ?? meta.votos ?? 0),
+    externo: externo ?? null, // ex.: { portal: "12", statusPortal: "aprovada-para-dev" }
     prioridade: null, risco: null, status: 'recebida', custo: 0,
     etapas: {},
     historico: [{ status: 'recebida', em: agora.toISOString() }],

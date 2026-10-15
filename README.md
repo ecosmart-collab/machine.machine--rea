@@ -41,6 +41,19 @@ demandas/entrada/          solte .md aqui (cabeçalho opcional: origem, votos)
 .fabrica/worktrees/        espaços isolados dos agentes (temporários)
 ```
 
+## Portal de ideias (fonte de demandas)
+
+O produto que a fábrica desenvolve — e que também alimenta a fábrica — é o
+[acelera-portal](../acelera-portal): ideias com votos, "Reportar bug" e a esteira com o status de cada pedido.
+Ideias que atingem o limiar de votos e bugs reportados entram na fila; a fábrica devolve o status a cada ciclo.
+
+```bash
+# terminal 1 — portal (clonado ao lado deste repositório)
+cd ../acelera-portal && PORTAL_TOKEN=um-segredo-longo npm start
+# terminal 2 — fábrica
+PORTAL_TOKEN=um-segredo-longo node src/fabrica.mjs watch
+```
+
 ## Apontar para um projeto real
 
 Em `fabrica.config.json`: `repo`, `branchBase`, `comandoPreparo` (ex. `npm ci`), `comandoTeste`, `comandoE2E`
