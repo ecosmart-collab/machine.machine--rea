@@ -1,0 +1,19 @@
+{
+  "repo": "./sandbox/app-exemplo",
+  "branchBase": "main",
+  "comandoPreparo": "",
+  "comandoTeste": "npm test",
+  "comandoE2E": "",
+  "paralelismo": 3,
+  "tentativasPorTarefa": 3,
+  "harness": { "padrao": "claude" },
+  "modelo": "",
+  "permissionMode": "acceptEdits",
+  "maxTurns": { "triagem": 15, "investigacao": 40, "refinamento": 25, "planejador": 30, "dev": 80, "revisor": 25, "qa": 30, "conhecer": 40 },
+  "timeoutMinutos": { "padrao": 20, "dev": 45 },
+  "entrega": {
+    "deployAutomaticoAteRisco": "nenhum",
+    "comando": ""
+  },
+  "intervaloWatchSegundos": 30
+}
